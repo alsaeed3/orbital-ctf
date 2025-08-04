@@ -30,9 +30,21 @@ export default function Navbar() {
     rollingScan: true,
   });
   const [title, setTitle] = useState('ORBITAL CTF');
+  const [mounted, setMounted] = useState(false);
 
   const navRef = useRef<HTMLDivElement>(null);
   const crtRef = useRef<HTMLDivElement>(null);
+
+  // Handle hydration
+  useEffect(() => {
+    setMounted(true);
+    
+    // Load localStorage data after hydration
+    const stored = localStorage.getItem('crtEffects');
+    if (stored !== null) {
+      setCrtEffects(JSON.parse(stored));
+    }
+  }, []);
 
   useEffect(() => {
     fetchSiteConfigurations()
@@ -43,15 +55,6 @@ export default function Navbar() {
       .catch(error => {
         console.error('Failed to fetch site configuration:', error);
       });
-  }, []);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('crtEffects');
-      if (stored !== null) {
-        setCrtEffects(JSON.parse(stored));
-      }
-    }
   }, []);
 
   useEffect(() => {
@@ -71,13 +74,15 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    document.body.classList.toggle('crt-scanlines-disabled', !crtEffects.scanlines);
-    document.body.classList.toggle('crt-flicker-disabled', !crtEffects.flicker);
-    document.body.classList.toggle('crt-phosphor-disabled', !crtEffects.phosphor);
-    document.body.classList.toggle('crt-glow-disabled', !crtEffects.glow);
-    document.body.classList.toggle('crt-rolling-scan-disabled', !crtEffects.rollingScan);
-    localStorage.setItem('crtEffects', JSON.stringify(crtEffects));
-  }, [crtEffects]);
+    if (mounted) {
+      document.body.classList.toggle('crt-scanlines-disabled', !crtEffects.scanlines);
+      document.body.classList.toggle('crt-flicker-disabled', !crtEffects.flicker);
+      document.body.classList.toggle('crt-phosphor-disabled', !crtEffects.phosphor);
+      document.body.classList.toggle('crt-glow-disabled', !crtEffects.glow);
+      document.body.classList.toggle('crt-rolling-scan-disabled', !crtEffects.rollingScan);
+      localStorage.setItem('crtEffects', JSON.stringify(crtEffects));
+    }
+  }, [crtEffects, mounted]);
 
   const toggleEffect = (effect: keyof CRTEffects) => {
     setCrtEffects(prev => ({

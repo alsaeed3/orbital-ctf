@@ -11,8 +11,8 @@ interface ConfigurationTabProps {
 export default function ConfigurationTab({ siteConfig, fetchConfig }: ConfigurationTabProps) {
   const [config, setConfig] = useState<SiteConfig>(siteConfig);
   const [gameConfig, setGameConfig] = useState<GameConfig>({
-    startTime: new Date(Date.now() + 3600000), // Default 1 hour from now
-    endTime: new Date(Date.now() + 86400000), // Default 24 hours from now
+    startTime: null, // Initialize as null to avoid hydration mismatch
+    endTime: null,   // Initialize as null to avoid hydration mismatch
     isActive: false,
     hasEndTime: true
   });
@@ -26,11 +26,29 @@ export default function ConfigurationTab({ siteConfig, fetchConfig }: Configurat
         if (data.id) {
           setGameConfig(data);
           setHasEndTime(data.hasEndTime !== false);
+        } else {
+          // Set default values after component mounts to avoid hydration mismatch
+          const defaultStartTime = new Date(Date.now() + 3600000); // 1 hour from now
+          const defaultEndTime = new Date(Date.now() + 86400000);  // 24 hours from now
+          setGameConfig(prev => ({
+            ...prev,
+            startTime: defaultStartTime,
+            endTime: defaultEndTime
+          }));
         }
       } catch (error) {
         const err = error as ApiError;
         console.error('Error fetching game config:', err.error);
         toast.error(`Error fetching game config: ${err.error}`);
+        
+        // Set default values on error too
+        const defaultStartTime = new Date(Date.now() + 3600000);
+        const defaultEndTime = new Date(Date.now() + 86400000);
+        setGameConfig(prev => ({
+          ...prev,
+          startTime: defaultStartTime,
+          endTime: defaultEndTime
+        }));
       } finally {
         setLoading(false);
       }

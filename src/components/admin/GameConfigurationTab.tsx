@@ -6,8 +6,8 @@ import { toast } from 'react-hot-toast';
 
 export default function GameConfigurationTab() {
   const [gameConfig, setGameConfig] = useState<GameConfig>({
-    startTime: new Date(Date.now() + 3600000),
-    endTime: new Date(Date.now() + 86400000),
+    startTime: null, // Initialize as null to avoid hydration mismatch
+    endTime: null,   // Initialize as null to avoid hydration mismatch
     isActive: false
   });
   const [hasEndTime, setHasEndTime] = useState(true);
@@ -20,11 +20,29 @@ export default function GameConfigurationTab() {
         if (data.id) {
           setGameConfig(data);
           setHasEndTime(data.hasEndTime !== false);
+        } else {
+          // Set default values after component mounts to avoid hydration mismatch
+          const defaultStartTime = new Date(Date.now() + 3600000); // 1 hour from now
+          const defaultEndTime = new Date(Date.now() + 86400000);  // 24 hours from now
+          setGameConfig(prev => ({
+            ...prev,
+            startTime: defaultStartTime.toISOString(),
+            endTime: defaultEndTime.toISOString()
+          }));
         }
       } catch (error) {
         const err = error as ApiError;
         console.error('Error fetching game config:', err.error);
         toast.error(`Error fetching game config: ${err.error}`);
+        
+        // Set default values on error too
+        const defaultStartTime = new Date(Date.now() + 3600000);
+        const defaultEndTime = new Date(Date.now() + 86400000);
+        setGameConfig(prev => ({
+          ...prev,
+          startTime: defaultStartTime.toISOString(),
+          endTime: defaultEndTime.toISOString()
+        }));
       } finally {
         setLoading(false);
       }

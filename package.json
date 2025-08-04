@@ -5,13 +5,17 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "prisma generate && next build",
-    "start": "next start",
+    "start": "node .next/standalone/server.js",
+    "start:next": "next start",
     "lint": "next lint",
-    "prisma:seed": "ts-node --compiler-options {\\\"module\\\":\\\"commonjs\\\"}  prisma/seed.ts",
-    "prisma:generate": "prisma generate"
-  },
-  "prisma": {
-    "seed": "ts-node --compiler-options {\"module\":\"commonjs\"}  prisma/seed.ts"
+    "prisma:seed": "ts-node --compiler-options {\"module\":\"commonjs\"} prisma/seed.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "deploy": "./deploy.sh"
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",
@@ -35,9 +39,11 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.178.1",
     "autoprefixer": "^10.4.17",
     "eslint": "^9",
     "eslint-config-next": "15.2.5",
